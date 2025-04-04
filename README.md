@@ -59,3 +59,8 @@ streamlit run streamlit_app.py
 - "jevlas ka" → Flirt emotion
 - "खूप छान" → Happy emotion
 - "gadhav" → Roast emotion
+
+=======
+# meme-gen
+Generate memes based on text ( supports Marathi)
+>>>>>>> ea0982e2780629b883018b9e18deef64759e6918
