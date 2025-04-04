@@ -1,0 +1,166 @@
+{
+    "search_terms": {
+        "happy": [
+            "happy meme", 
+            "joy reaction", 
+            "excited gif", 
+            "celebration gif", 
+            "dance happy",
+            "happy dance",
+            "victory celebration",
+            "party hard",
+            "jumping joy",
+            "happy cat",
+            "happy dog",
+            "success kid",
+            "winning moment"
+        ],
+        "sad": [
+            "sad meme", 
+            "depressed reaction", 
+            "crying gif", 
+            "disappointed gif", 
+            "upset reaction",
+            "sad cat",
+            "sad dog",
+            "crying baby",
+            "heartbreak",
+            "sad anime",
+            "tears flowing",
+            "emotional breakdown"
+        ],
+        "positive": [
+            "positive vibes", 
+            "good mood", 
+            "optimistic", 
+            "thumbs up gif", 
+            "awesome reaction",
+            "great job",
+            "well done",
+            "proud moment",
+            "achievement unlocked",
+            "mission accomplished",
+            "perfect score",
+            "excellent work"
+        ],
+        "negative": [
+            "angry meme", 
+            "frustrated reaction", 
+            "annoyed gif", 
+            "mad gif", 
+            "rage quit",
+            "angry cat",
+            "angry dog",
+            "table flip",
+            "rage comic",
+            "fury reaction",
+            "mad anime",
+            "hulk angry"
+        ],
+        "neutral": [
+            "neutral reaction", 
+            "meh meme", 
+            "whatever gif", 
+            "ok gif", 
+            "shrug gif",
+            "idk reaction",
+            "not sure if",
+            "confused math lady",
+            "thinking face",
+            "poker face",
+            "blank stare",
+            "confused cat"
+        ],
+        "flirt": [
+            "cute flirt", 
+            "wink gif", 
+            "flirting reaction",
+            "anime blush",
+            "shy reaction",
+            "heart eyes",
+            "love struck",
+            "cupid arrow",
+            "flirty smile"
+        ],
+        "roast": [
+            "roast meme", 
+            "savage reaction", 
+            "burn gif", 
+            "destruction gif", 
+            "owned gif",
+            "emotional damage",
+            "destroyed in seconds",
+            "thug life",
+            "mic drop",
+            "savage comeback"
+        ],
+        "sarcasm": [
+            "sarcastic reaction",
+            "eye roll",
+            "yeah right meme",
+            "sure sure gif",
+            "obviously meme",
+            "skill issue meme",
+            "git gud reaction",
+            "sarcastic face",
+            "eyeroll gif",
+            "whatever reaction",
+            "sarcastic clap",
+            "slow clap",
+            "sarcastic applause",
+            "oh really",
+            "you dont say",
+            "sarcastic cat memes",
+            "sure jan",
+            "press x to doubt"
+        ]
+    },
+    "fallback_memes": {
+        "happy": [
+            "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",
+            "https://media.giphy.com/media/l41lUjUgLLwWrz20w/giphy.gif",
+            "https://media.giphy.com/media/26u4lOMA8JKSnL9Uk/giphy.gif"
+        ],
+        "sad": [
+            "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
+            "https://media.giphy.com/media/d2lcHJTG5Tscg/giphy.gif",
+            "https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif"
+        ],
+        "sarcasm": [
+            "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
+            "https://media.giphy.com/media/wzxK9cmYgIPDy/giphy.gif",
+            "https://media.giphy.com/media/l0HlvtIPzPzsNYbXW/giphy.gif"
+        ],
+        "roast": [
+            "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",
+            "https://media.giphy.com/media/Aff4ryYiacUO4/giphy.gif",
+            "https://media.giphy.com/media/RdKjAkFTNZkWUGyRXF/giphy.gif"
+        ],
+        "flirt": [
+            "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
+            "https://media.giphy.com/media/l41Yh1jQhxNQHQXL2/giphy.gif",
+            "https://media.giphy.com/media/l0HlDJhyI8qoh7Wfu/giphy.gif"
+        ],
+        "positive": [
+            "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
+            "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",
+            "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",
+            "https://media.giphy.com/media/l41YdDNnasCzZXWX6/giphy.gif"
+        ],
+        "negative": [
+            "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",
+            "https://media.giphy.com/media/l41YfykEffZ7QM55m/giphy.gif",
+            "https://media.giphy.com/media/l0HlDHQEiIdY3kxlm/giphy.gif"
+        ],
+        "neutral": [
+            "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",
+            "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",
+            "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",
+            "https://media.giphy.com/media/xT0GqimU9dTwmE5lra/giphy.gif",
+            "https://media.giphy.com/media/3o7TKwmnDgQb5jemjK/giphy.gif",
+            "https://media.giphy.com/media/3o6Zt4HU9uwXmXSAuI/giphy.gif",
+            "https://media.giphy.com/media/3o6UB2MSoh7z6Gw3fO/giphy.gif",
+            "https://media.giphy.com/media/3oAt2dA6LxMkRrGc0g/giphy.gif"
+        ]
+    }
+} 

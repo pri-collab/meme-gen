@@ -11,6 +11,8 @@ import giphy_client
 from giphy_client.rest import ApiException
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
+import json
+from pathlib import Path
 
 # Configure logging
 logging.basicConfig(
@@ -30,71 +32,43 @@ logging.getLogger('urllib3').setLevel(logging.WARNING)
 # Load environment variables
 load_dotenv()
 
-# Default neutral memes for fallback
-NEUTRAL_MEMES = [
+# Load emotion data from JSON
+def load_emotions():
+    """Load emotion data from JSON file."""
+    try:
+        json_path = Path(__file__).parent / 'emotions.json'
+        with open(json_path, 'r', encoding='utf-8') as f:
+            emotions_data = json.load(f)
+        return emotions_data
+    except Exception as e:
+        st.error(f"Error loading emotions.json: {str(e)}")
+        return {}
+
+def load_meme_config():
+    """Load meme search terms and fallback memes from JSON file."""
+    try:
+        json_path = Path(__file__).parent / 'meme_search_terms.json'
+        with open(json_path, 'r', encoding='utf-8') as f:
+            meme_data = json.load(f)
+        return meme_data
+    except Exception as e:
+        st.error(f"Error loading meme_search_terms.json: {str(e)}")
+        return {"search_terms": {}, "fallback_memes": {}}
+
+# Load data from JSON files
+EMOTIONS_DATA = load_emotions()
+MEME_CONFIG = load_meme_config()
+MARATHI_EMOTIONS = {emotion: set(words) for emotion, words in EMOTIONS_DATA.items() if emotion != 'phrases'}
+EMOTION_PHRASES = EMOTIONS_DATA.get('phrases', {})
+SEARCH_TERMS = MEME_CONFIG.get('search_terms', {})
+FALLBACK_MEMES = MEME_CONFIG.get('fallback_memes', {})
+
+# Default neutral memes for fallback if JSON loading fails
+DEFAULT_NEUTRAL_MEMES = [
     "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",     
     "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif", 
-    "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",
-    "https://media.giphy.com/media/xT0GqimU9dTwmE5lra/giphy.gif",  # Shrug
-    "https://media.giphy.com/media/3o7TKwmnDgQb5jemjK/giphy.gif",  # Whatever
-    "https://media.giphy.com/media/3o6Zt4HU9uwXmXSAuI/giphy.gif",  # Meh
-    "https://media.giphy.com/media/3o6UB2MSoh7z6Gw3fO/giphy.gif",  # Neutral face
-    "https://media.giphy.com/media/3oAt2dA6LxMkRrGc0g/giphy.gif"   # OK
+    "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif"
 ]
-
-# Marathi words categorized by emotions/sentiments
-MARATHI_EMOTIONS = {
-    'happy': {
-        'bara', 'bari', 'changla', 'changali', 'chhan', 'mast', 'khush', 'anandi',
-        'majja', 'majet', 'waah', 'hushar', 'hushaar', 'hushshar', 'hushyar',
-        'shaana', 'shahana', 'chalak'
-    },
-    'sad': {
-        'dukh', 'rad', 'radto', 'radtoy', 'raag', 'ragavto', 'ragavtoy', 'waeet',
-        'vait', 'kharab', 'tras'
-    },
-    'angry': {
-        'rag', 'raag', 'ragavla', 'ragavli', 'chid', 'chidla', 'chidli',
-        'gadhav', 'kavlya', 'taklya'
-    },
-    'surprise': {
-        'are', 'arre', 'arrey', 'kay', 'kaay', 'khara',
-        'kharach','bapre','kahihi'
-    },
-    'question': {
-        'kay', 'kaay', 'kasa', 'kashi', 'ka', 'kaa', 'kashala', 'kuthe',
-        'kadhi', 'kenvha','kashasathi'
-    },
-    'neutral': {
-        'aahe', 'ahe', 'hota', 'hoti', 'hot', 'nahi', 'naahi',
-        'mi', 'tu', 'tumhi', 'aapan', 'ghari', 'ja'
-    },
-    'excited': {
-        'khup', 'khoop', 'jast', 'jaast', 'ekdum', 'bhari', 'jabardast',
-        'jhakas', 'aha', 'mast', 'anand'
-    },
-    'flirt': {
-        'sundar', 'sundara', 'goad', 'jevlis', 'jevlas', 'janu', 'babe', 'baby',
-        'prem',  'jaanu', 'babu', 'sona', 'maza', 'majha', 'tujha', 
-        'tujhi', 'jiv','qt','cute', 'tu khup qt ahe', 'qt ahes', 'cute ahes',
-        'khup cute ahe'
-    },
-    'roast': {
-        'veda', 'vedi', 'pagal', 'gadha', 'gadhav', 'mahamurkh', 'mhais', 'reda', 'redya',
-        'popat', 'buddhu', 'nalayak', 'gadhava', 'murkha', 'murkhya', 'murkh', 'makad', 
-        'bavlat', 'chapri', 'baila', 'kavlya', 'taklya', 'chakram', 'dhakkan',
-        'bewakoof', 'bewkuf', 'bewda', 'randukkar', 'tapori'
-    },
-    'sarcasm': {
-        'ho_na', 'hona', 'barach', 'khari', 'khupach', 'kharch', 'obviously',
-        'jarur', 'nakkich', 'avjun', 'avashya', 'shahanapana', 'shahane',
-        'great', 'wah_wah', 'wahwa', 'khup_chhan_ha', 'kiti_changla_re_tu', 'kiti_hushaar',
-        'vaah_re', 'vah_re', 'vah_va', 'asa_ka', 'asa_kaa', 'hoy_na', 'hoyna'
-    }
-}
-
-# Flatten emotions dict for word detection
-MARATHI_COMMON_WORDS = set().union(*MARATHI_EMOTIONS.values())
 
 # Download NLTK data
 try:
@@ -113,7 +87,7 @@ def is_marathi(text):
 def is_marathi_transcript(text):
     """Check if text might be Marathi written in English."""
     words = set(text.lower().split())
-    marathi_word_count = len(words.intersection(MARATHI_COMMON_WORDS))
+    marathi_word_count = len(words.intersection(MARATHI_EMOTIONS['roast']))
     return marathi_word_count / len(words) > 0.2 if words else False
 
 def detect_emotion(text):
@@ -130,21 +104,11 @@ def detect_emotion(text):
     # Then check for flirt-specific patterns with partial matching
     if any('qt' in word or 'cute' in word for word in words):
         return 'flirt'
-        
-    # Check for specific phrases
-    flirt_phrases = [
-        'jevlas ka', 'jevlis ka', 'khup cute ahe', 'tu khup qt ahe', 
-        'qt ahes', 'cute ahes', 'khup qt', 'you are qt', 'you are cute',
-        'tu qt', 'tu cute'
-    ]
-    if any(phrase in text_lower for phrase in flirt_phrases):
-        return 'flirt'
-        
-    if 'ghari ja' in text_lower:
-        return 'roast'
-        
-    if any(phrase in text_lower for phrase in ['ho na', 'hoy na', 'kiti chan']):
-        return 'sarcasm'
+    
+    # Check for specific phrases from JSON
+    for emotion, phrases in EMOTION_PHRASES.items():
+        if any(phrase in text_lower for phrase in phrases):
+            return emotion
     
     # Then check for word combinations that indicate flirting
     if ('khup' in words or 'khoop' in words) and ('cute' in words or 'qt' in words):
@@ -194,7 +158,7 @@ def get_giphy_meme(text):
         api_key = os.getenv("GIPHY_API_KEY")
         if not api_key:
             logging.warning("No GIPHY API key found, using neutral memes")
-            return random.choice(NEUTRAL_MEMES)
+            return random.choice(FALLBACK_MEMES.get('neutral', DEFAULT_NEUTRAL_MEMES))
 
         # Configure API key
         api_instance = giphy_client.DefaultApi()
@@ -203,26 +167,8 @@ def get_giphy_meme(text):
         emotion = analyze_sentiment(text)
         st.info(f"Detected sentiment: {emotion.upper()}")
         
-        # Define search terms based on sentiment with more variety
-        search_terms = {
-            'happy': ['happy meme', 'joy reaction', 'excited gif', 'celebration gif', 'dance happy'],
-            'sad': ['sad meme', 'depressed reaction', 'crying gif', 'disappointed gif', 'upset reaction'],
-            'positive': ['positive vibes', 'good mood', 'optimistic', 'thumbs up gif', 'awesome reaction'],
-            'negative': ['angry meme', 'frustrated reaction', 'annoyed gif', 'mad gif', 'rage quit'],
-            'neutral': ['neutral reaction', 'meh meme', 'whatever gif', 'ok gif', 'shrug gif'],
-            'flirt': ['cute flirt', 'romantic cute', 'sweet couple', 'wink gif', 'flirting reaction'],
-            'roast': ['roast meme', 'savage reaction', 'burn gif', 'destruction gif', 'owned gif'],
-            'sarcasm': [
-                'sarcastic reaction', 'eye roll', 'yeah right meme', 
-                'sure sure gif', 'obviously meme', 'skill issue meme',
-                'git gud reaction', 'cope seethe meme', 'sarcastic face',
-                'eyeroll gif', 'whatever reaction', 'sarcastic clap',
-                'slow clap', 'sarcastic applause'
-            ]
-        }
-        
         # Get search terms for the detected emotion
-        terms = search_terms.get(emotion, ['meme', 'reaction'])
+        terms = SEARCH_TERMS.get(emotion, ['meme', 'reaction'])
         
         # Randomly select a search term and get multiple results
         term = random.choice(terms)
@@ -238,57 +184,16 @@ def get_giphy_meme(text):
                 return random.choice(api_response.data).images.original.url
         except ApiException as e:
             if e.status == 429:  # Rate limit exceeded
-                st.warning("GIPHY API rate limit reached. Using fallback memes.")
+                logging.warning("GIPHY API rate limit reached. Using fallback memes.")
             else:
-                st.warning(f"Failed to search with term '{term}': {str(e)}")
+                logging.warning(f"Failed to search with term '{term}': {str(e)}")
         
         # If we hit rate limit or no memes found, use fallback memes
-        fallback_memes = {
-            'happy': [
-                "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",  # Happy dance
-                "https://media.giphy.com/media/l41lUjUgLLwWrz20w/giphy.gif",  # Celebration
-                "https://media.giphy.com/media/26u4lOMA8JKSnL9Uk/giphy.gif"  # Joy
-            ],
-            'sad': [
-                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",  # Sad face
-                "https://media.giphy.com/media/d2lcHJTG5Tscg/giphy.gif",  # Crying
-                "https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif"  # Disappointed
-            ],
-            'sarcasm': [
-                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",  # Eye roll
-                "https://media.giphy.com/media/wzxK9cmYgIPDy/giphy.gif",  # Whatever
-                "https://media.giphy.com/media/l0HlvtIPzPzsNYbXW/giphy.gif"  # Sure sure
-            ],
-            'roast': [
-                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",  # Burn
-                "https://media.giphy.com/media/Aff4ryYiacUO4/giphy.gif",  # Destroyed
-                "https://media.giphy.com/media/RdKjAkFTNZkWUGyRXF/giphy.gif"  # Roasted
-            ],
-            'flirt': [
-                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",  # Wink
-                "https://media.giphy.com/media/l41Yh1jQhxNQHQXL2/giphy.gif",  # Cute
-                "https://media.giphy.com/media/l0HlDJhyI8qoh7Wfu/giphy.gif"  # Sweet
-            ],
-            'positive': [
-                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",  # Thumbs up
-                "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",  # Happy dance
-                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",  # Celebration
-                "https://media.giphy.com/media/l41YdDNnasCzZXWX6/giphy.gif"  # Awesome
-            ],
-            'negative': [
-                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",  # Angry
-                "https://media.giphy.com/media/l41YfykEffZ7QM55m/giphy.gif",  # Mad
-                "https://media.giphy.com/media/l0HlDHQEiIdY3kxlm/giphy.gif"  # Rage
-            ],
-            'neutral': NEUTRAL_MEMES
-        }
-        
-        # Return a random fallback meme based on emotion, or a neutral one if no specific fallback
-        return random.choice(fallback_memes.get(emotion, NEUTRAL_MEMES))
+        return random.choice(FALLBACK_MEMES.get(emotion, FALLBACK_MEMES.get('neutral', DEFAULT_NEUTRAL_MEMES)))
         
     except Exception as e:
-        st.error(f"Error getting meme: {str(e)}")
-        return random.choice(NEUTRAL_MEMES)
+        logging.error(f"Error in get_giphy_meme: {str(e)}")
+        return random.choice(DEFAULT_NEUTRAL_MEMES)
 
 def get_font(text, size):
     """Get the font for text rendering."""
@@ -317,7 +222,7 @@ def get_font(text, size):
         # For English text and transliterated Marathi, use Impact font
         impact_paths = [
             "/Library/Fonts/Impact.ttf",  # macOS
-            "/usr/share/fonts/truetype/msttcorefonts/Impact.ttf",  # Linux
+            "/usr/share/fonts/truetype/noto/Impact.ttf",  # Linux
             "C:\\Windows\\Fonts\\Impact.ttf",  # Windows
             "static/fonts/Impact.ttf"  # Local project directory
         ]

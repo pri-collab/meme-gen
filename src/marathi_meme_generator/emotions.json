@@ -1,0 +1,57 @@
+{
+    "happy": [
+        "bara", "bari", "changla", "changali", "chhan", "mast", "khush", "anandi",
+        "majja", "majet", "waah", "hushar", "hushaar"
+    ],
+    "sad": [
+        "dukh", "rad", "radto", "radtoy", "raag", "ragavto", "ragavtoy", "waeet",
+        "vait", "kharab", "tras"
+    ],
+    "angry": [
+        "rag", "raag", "ragavla", "ragavli", "chidlo", "chidle", 
+        "gadhav", "kavlya", "taklya"
+    ],
+    "surprise": [
+        "are", "arre", "arrey", "kay", "kaay", "khara",
+        "kharach", "bapre", "kahihi"
+    ],
+    "question": [
+        "kay", "kaay", "kasa", "kashi", "ka", "kaa", "kashala", "kuthe",
+        "kadhi", "kenvha", "kashasathi"
+    ],
+    "neutral": [
+        "aahe", "ahe", "hota", "hoti", "hot", "nahi", "naahi",
+        "mi", "tu", "tumhi", "aapan", "ghari", "ja"
+    ],
+    "excited": [
+        "khup", "khoop", "jast", "jaast", "ekdum", "bhari", "jabardast",
+        "jhakas", "aha", "mast", "anand"
+    ],
+    "flirt": [
+        "sundar", "sundara", "goad", "jevlis", "jevlas", "janu", "babe", "baby",
+        "prem", "jaanu", "babu", "sona", "maza", "majha", "tujha", 
+        "tujhi", "jiv", "qt", "cute", "tu khup qt ahe", "qt ahes", "cute ahes",
+        "khup cute ahe"
+    ],
+    "roast": [
+        "veda", "vedi", "pagal", "gadha", "gadhav", "mahamurkh", "mhais", "reda", "redya",
+        "popat", "buddhu", "nalayak", "gadhava", "murkha", "murkhshiromani", "murkh", "makad", 
+        "bavlat", "chapri", "baila", "kavlya", "taklya", "chakram", "dhakkan",
+        "bewakoof", "bevkuf", "bevda", "randukkar", "tapori", "dukkar"
+    ],
+    "sarcasm": [
+        "ho_na", "hona", "barach", "khari", "khupach", "kharch", "obviously",
+        "jarur", "nakkich", "avjun", "avashya", "shahanapana", "shahane",
+        "great", "wah_wah", "wahwa", "khup_chhan_ha", "kiti_changla_re_tu", "kiti_hushaar",
+        "vaah_re", "vah_re", "vah_va", "asa_ka", "asa_kaa", "hoy_na", "hoyna"
+    ],
+    "phrases": {
+        "flirt": [
+            "jevlas ka", "jevlis ka", "khup cute ahe", "tu khup qt ahe",
+            "qt ahes", "cute ahes", "khup qt", "you are qt", "you are cute",
+            "tu qt", "tu cute","sundar ahes","kiti goad ahe"
+        ],
+        "roast": ["ghari ja","khaddyat ja","gelas udat","shahanach ahes"],
+        "sarcasm": ["ho na", "hoy na", "kiti chan","ho ka?"]
+    }
+} 
