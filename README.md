@@ -1,14 +1,17 @@
 # Marathi Meme Generator
 
-A Streamlit application that generates memes with Marathi text. The app detects emotions from Marathi text (both Devanagari and transliterated) and fetches relevant memes from Giphy.
+A Streamlit application that generates memes with Marathi text and sentiment analysis. The app can detect emotions in both English and Marathi text, and generates appropriate memes with text overlay.
 
 ## Features
 
-- Supports both Devanagari and transliterated Marathi text
-- Emotion detection for Marathi text
-- Automatic font selection (Devanagari for Marathi, Impact for English)
-- Dynamic text sizing and wrapping
-- Meme generation based on detected emotions
+- Sentiment analysis for both English and Marathi text
+- Emotion detection (happy, sad, positive, negative, neutral)
+- Special handling for Marathi emotions (flirt, roast, sarcasm)
+- Text overlay on memes (supports both static images and animated GIFs)
+- Fallback memes when API rate limits are reached
+- UI with Streamlit
+
+
 
 ## Setup
 
@@ -18,49 +21,66 @@ git clone https://github.com/pri-collab/meme-gen.git
 cd meme-gen
 ```
 
-2. Create a virtual environment and activate it:
+2. Create and activate a virtual environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
 3. Install dependencies using uv:
 ```bash
-uv add streamlit Pillow requests python-dotenv
+uv pip install -e .
 ```
 
-4. Create a `.env` file with your Giphy API key:
+4. Create a `.env` file with your GIPHY API key:
 ```
 GIPHY_API_KEY=your_api_key_here
 ```
 
-5. Run the application:
-```bash
-streamlit run streamlit_app.py
-```
-
-## Requirements
-
-- Python 3.9+
-- uv (Python package installer)
-- Streamlit
-- Pillow
-- Requests
-- python-dotenv
-
 ## Usage
 
-1. Enter Marathi text (in Devanagari or transliterated form)
-2. Click "Generate Meme"
-3. The app will detect the emotion and generate a relevant meme
+1. Run the Streamlit app:
+```bash
+.venv/bin/python -m streamlit run src/marathi_meme_generator/main.py
+```
 
-## Examples
+2. Open your browser and go to http://localhost:8501
 
-- "jevlas ka" → Flirt emotion
-- "खूप छान" → Happy emotion
-- "gadhav" → Roast emotion
+3. Enter text in the input box to generate memes. Examples:
+   - English: "I'm so happy!", "This is terrible", "The sky is blue"
+   - Marathi: "खूप छान", "jevlas ka", "gadhav"
+   - Sarcastic: "skill issue", "git gud", "cope and seethe"
+
+## Features in Detail
+
+### Sentiment Analysis
+- Uses NLTK's VADER for English sentiment analysis
+- Custom Marathi emotion detection
+- Supports multiple emotions: happy, sad, positive, negative, neutral
+- Special handling for Marathi-specific emotions (flirt, roast, sarcasm)
+
+### Meme Generation
+- Fetches memes from GIPHY API
+- Prioritizes animated GIFs
+- Adds text overlay with proper formatting
+- Includes fallback memes for when API rate limits are reached
+- Supports both static images and animated GIFs
+
+### Text Overlay
+- Automatically sizes text to fit the image
+- Adds black background for better readability
+- White text with black outline for visibility
+
+## Dependencies
+
+- streamlit>=1.32.0
+- Pillow>=10.2.0
+- requests>=2.31.0
+- python-dotenv>=1.0.0
+- giphy_client>=1.0.0
+- nltk>=3.8.1
 
 =======
 # meme-gen
-Generate memes based on text ( supports Marathi)
->>>>>>> ea0982e2780629b883018b9e18deef64759e6918
+searches memes based on text ( supports Marathi)
+
