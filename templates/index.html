@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Meme Generator</h1>
+        
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <div class="mb-6">
+                <label for="meme-text" class="block text-gray-700 text-sm font-bold mb-2">Enter your text:</label>
+                <input type="text" id="meme-text" 
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                       placeholder="Type your meme text here...">
+            </div>
+
+            <div class="mb-6">
+                <label for="language" class="block text-gray-700 text-sm font-bold mb-2">Select Language:</label>
+                <select id="language" 
+                        class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="en">English</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                </select>
+            </div>
+            
+            <button onclick="searchMeme()" 
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+                Search & Generate Meme
+            </button>
+            
+            <div id="meme-container" class="mt-6 text-center hidden">
+                <img id="meme-image" class="max-w-full h-auto mx-auto rounded-lg shadow-lg" alt="Generated Meme">
+                <button onclick="downloadMeme()" 
+                        class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Download Meme
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function searchMeme() {
+            const text = document.getElementById('meme-text').value;
+            const language = document.getElementById('language').value;
+            
+            if (!text) {
+                alert('Please enter some text!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text, language }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate meme');
+                }
+
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                
+                const memeContainer = document.getElementById('meme-container');
+                const memeImage = document.getElementById('meme-image');
+                
+                memeImage.src = imageUrl;
+                memeContainer.classList.remove('hidden');
+            } catch (error) {
+                alert('Error generating meme. Please try again.');
+                console.error(error);
+            }
+        }
+
+        function downloadMeme() {
+            const memeImage = document.getElementById('meme-image');
+            const link = document.createElement('a');
+            link.href = memeImage.src;
+            link.download = 'generated-meme.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html> 
