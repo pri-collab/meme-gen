@@ -34,14 +34,20 @@ load_dotenv()
 NEUTRAL_MEMES = [
     "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",     
     "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif", 
-    "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif"      
+    "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",
+    "https://media.giphy.com/media/xT0GqimU9dTwmE5lra/giphy.gif",  # Shrug
+    "https://media.giphy.com/media/3o7TKwmnDgQb5jemjK/giphy.gif",  # Whatever
+    "https://media.giphy.com/media/3o6Zt4HU9uwXmXSAuI/giphy.gif",  # Meh
+    "https://media.giphy.com/media/3o6UB2MSoh7z6Gw3fO/giphy.gif",  # Neutral face
+    "https://media.giphy.com/media/3oAt2dA6LxMkRrGc0g/giphy.gif"   # OK
 ]
 
 # Marathi words categorized by emotions/sentiments
 MARATHI_EMOTIONS = {
     'happy': {
         'bara', 'bari', 'changla', 'changali', 'chhan', 'mast', 'khush', 'anandi',
-        'majja', 'majet', 'waah'
+        'majja', 'majet', 'waah', 'hushar', 'hushaar', 'hushshar', 'hushyar',
+        'shaana', 'shahana', 'chalak'
     },
     'sad': {
         'dukh', 'rad', 'radto', 'radtoy', 'raag', 'ragavto', 'ragavtoy', 'waeet',
@@ -70,12 +76,14 @@ MARATHI_EMOTIONS = {
     'flirt': {
         'sundar', 'sundara', 'goad', 'jevlis', 'jevlas', 'janu', 'babe', 'baby',
         'prem',  'jaanu', 'babu', 'sona', 'maza', 'majha', 'tujha', 
-        'tujhi', 'jiv'
+        'tujhi', 'jiv','qt','cute', 'tu khup qt ahe', 'qt ahes', 'cute ahes',
+        'khup cute ahe'
     },
     'roast': {
         'veda', 'vedi', 'pagal', 'gadha', 'gadhav', 'mahamurkh', 'mhais', 'reda', 'redya',
-        'popat', 'buddhu', 'nalayak', 'gadhava', 'murkha', 'makad', 'shahana',
-        'bavlat', 'chapri', 'baila', 'kavlya', 'taklya', 'chakram'
+        'popat', 'buddhu', 'nalayak', 'gadhava', 'murkha', 'murkhya', 'murkh', 'makad', 
+        'bavlat', 'chapri', 'baila', 'kavlya', 'taklya', 'chakram', 'dhakkan',
+        'bewakoof', 'bewkuf', 'bewda', 'randukkar', 'tapori'
     },
     'sarcasm': {
         'ho_na', 'hona', 'barach', 'khari', 'khupach', 'kharch', 'obviously',
@@ -110,22 +118,47 @@ def is_marathi_transcript(text):
 
 def detect_emotion(text):
     """check the emotion from Marathi text."""
-    # Convert text to lowercase and split into words
-    words = text.lower().split()
-    
-    # First check for exact phrases
+    # Convert text to lowercase for case-insensitive matching
     text_lower = text.lower()
-    if 'jevlas ka' in text_lower or 'jevlis ka' in text_lower:
+    words = text_lower.split()
+    
+    # First check for roast words (highest priority) with partial matching
+    for roast_word in MARATHI_EMOTIONS['roast']:
+        if any(roast_word in word for word in words):
+            return 'roast'
+    
+    # Then check for flirt-specific patterns with partial matching
+    if any('qt' in word or 'cute' in word for word in words):
         return 'flirt'
-    if 'ghari ja' in text_lower or 'ghari ja' in text_lower:
+        
+    # Check for specific phrases
+    flirt_phrases = [
+        'jevlas ka', 'jevlis ka', 'khup cute ahe', 'tu khup qt ahe', 
+        'qt ahes', 'cute ahes', 'khup qt', 'you are qt', 'you are cute',
+        'tu qt', 'tu cute'
+    ]
+    if any(phrase in text_lower for phrase in flirt_phrases):
+        return 'flirt'
+        
+    if 'ghari ja' in text_lower:
         return 'roast'
-    if 'ho na' in text_lower or 'hoy na' in text_lower or 'kiti chan' in text_lower:
+        
+    if any(phrase in text_lower for phrase in ['ho na', 'hoy na', 'kiti chan']):
         return 'sarcasm'
     
-    # Then check individual words in dictionary
+    # Then check for word combinations that indicate flirting
+    if ('khup' in words or 'khoop' in words) and ('cute' in words or 'qt' in words):
+        return 'flirt'
+    
+    # Then check individual words in dictionary with partial matching
     emotion_counts = {}
     for emotion, word_set in MARATHI_EMOTIONS.items():
-        count = len(set(words).intersection(word_set))
+        # Count both exact and partial matches
+        count = 0
+        for word in words:
+            # Check if any emotion word is part of the current word
+            matches = sum(1 for emotion_word in word_set if emotion_word in word)
+            count += matches
         if count > 0:
             emotion_counts[emotion] = count
     
@@ -133,32 +166,25 @@ def detect_emotion(text):
     return max(emotion_counts.items(), key=lambda x: x[1])[0] if emotion_counts else 'neutral'
 
 def analyze_sentiment(text):
-    """Analyze sentiment of text using NLTK's VADER."""
-    # For Marathi text, we'll use our existing emotion detection
-    if is_marathi(text) or is_marathi_transcript(text):
-        return detect_emotion(text)
-    
-    # For English text, use NLTK sentiment analysis
-    sentiment_scores = sia.polarity_scores(text)
-    
-    # Check for sarcasm indicators in English
-    sarcasm_indicators = [
-        'yeah right', 'sure sure', 'oh really', 'how nice', 'great job',
-        'skill issue'
-    ]
-    if any(indicator in text.lower() for indicator in sarcasm_indicators):
-        return 'sarcasm'
-    
-    # Map sentiment scores to emotions
-    if sentiment_scores['compound'] >= 0.5:
-        return 'happy'
-    elif sentiment_scores['compound'] <= -0.5:
-        return 'sad'
-    elif sentiment_scores['compound'] > 0:
-        return 'positive'
-    elif sentiment_scores['compound'] < 0:
-        return 'negative'
-    else:
+    """Analyze sentiment of the text using NLTK's VADER and custom Marathi word lists."""
+    # First check for Marathi emotion using detect_emotion
+    emotion = detect_emotion(text.lower())
+    if emotion != 'neutral':
+        return emotion
+            
+    # If no Marathi emotion detected, use NLTK for English
+    try:
+        scores = sia.polarity_scores(text)
+        compound_score = scores['compound']
+        
+        if compound_score >= 0.05:
+            return 'happy'
+        elif compound_score <= -0.05:
+            return 'sad'
+        else:
+            return 'neutral'
+    except Exception as e:
+        st.error(f"Error in sentiment analysis: {str(e)}")
         return 'neutral'
 
 def get_giphy_meme(text):
@@ -177,15 +203,15 @@ def get_giphy_meme(text):
         emotion = analyze_sentiment(text)
         st.info(f"Detected sentiment: {emotion.upper()}")
         
-        # Define search terms based on sentiment
+        # Define search terms based on sentiment with more variety
         search_terms = {
-            'happy': ['happy meme', 'joy reaction', 'excited gif'],
-            'sad': ['sad meme', 'depressed reaction', 'crying gif'],
-            'positive': ['positive vibes', 'good mood', 'optimistic'],
-            'negative': ['angry meme', 'frustrated reaction', 'annoyed gif'],
-            'neutral': ['neutral reaction', 'meh meme', 'whatever gif'],
-            'flirt': ['cute flirt', 'romantic cute', 'sweet couple'],
-            'roast': ['roast meme', 'savage reaction', 'burn gif'],
+            'happy': ['happy meme', 'joy reaction', 'excited gif', 'celebration gif', 'dance happy'],
+            'sad': ['sad meme', 'depressed reaction', 'crying gif', 'disappointed gif', 'upset reaction'],
+            'positive': ['positive vibes', 'good mood', 'optimistic', 'thumbs up gif', 'awesome reaction'],
+            'negative': ['angry meme', 'frustrated reaction', 'annoyed gif', 'mad gif', 'rage quit'],
+            'neutral': ['neutral reaction', 'meh meme', 'whatever gif', 'ok gif', 'shrug gif'],
+            'flirt': ['cute flirt', 'romantic cute', 'sweet couple', 'wink gif', 'flirting reaction'],
+            'roast': ['roast meme', 'savage reaction', 'burn gif', 'destruction gif', 'owned gif'],
             'sarcasm': [
                 'sarcastic reaction', 'eye roll', 'yeah right meme', 
                 'sure sure gif', 'obviously meme', 'skill issue meme',
@@ -198,56 +224,66 @@ def get_giphy_meme(text):
         # Get search terms for the detected emotion
         terms = search_terms.get(emotion, ['meme', 'reaction'])
         
-        # Try each search term until we get a result
-        for term in terms:
-            try:
-                api_response = api_instance.gifs_search_get(
-                    api_key,
-                    term,
-                    limit=1,
-                    rating='g'
-                )
-                if api_response.data:
-                    return api_response.data[0].images.original.url
-            except ApiException as e:
-                if e.status == 429:  # Rate limit exceeded
-                    st.warning("GIPHY API rate limit reached. Using fallback memes.")
-                    break
-                else:
-                    st.warning(f"Failed to search with term '{term}': {str(e)}")
-                    continue
+        # Randomly select a search term and get multiple results
+        term = random.choice(terms)
+        try:
+            api_response = api_instance.gifs_search_get(
+                api_key,
+                term,
+                limit=5,  # Get 5 results instead of 1
+                rating='g'
+            )
+            if api_response.data:
+                # Randomly select one of the results
+                return random.choice(api_response.data).images.original.url
+        except ApiException as e:
+            if e.status == 429:  # Rate limit exceeded
+                st.warning("GIPHY API rate limit reached. Using fallback memes.")
+            else:
+                st.warning(f"Failed to search with term '{term}': {str(e)}")
         
         # If we hit rate limit or no memes found, use fallback memes
         fallback_memes = {
             'happy': [
-                "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif"  # Happy dance
+                "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",  # Happy dance
+                "https://media.giphy.com/media/l41lUjUgLLwWrz20w/giphy.gif",  # Celebration
+                "https://media.giphy.com/media/26u4lOMA8JKSnL9Uk/giphy.gif"  # Joy
             ],
             'sad': [
-                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif"  # Sad face
+                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",  # Sad face
+                "https://media.giphy.com/media/d2lcHJTG5Tscg/giphy.gif",  # Crying
+                "https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif"  # Disappointed
             ],
             'sarcasm': [
-                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif"  # Eye roll
+                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",  # Eye roll
+                "https://media.giphy.com/media/wzxK9cmYgIPDy/giphy.gif",  # Whatever
+                "https://media.giphy.com/media/l0HlvtIPzPzsNYbXW/giphy.gif"  # Sure sure
             ],
             'roast': [
-                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif"  # Burn
+                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",  # Burn
+                "https://media.giphy.com/media/Aff4ryYiacUO4/giphy.gif",  # Destroyed
+                "https://media.giphy.com/media/RdKjAkFTNZkWUGyRXF/giphy.gif"  # Roasted
             ],
             'flirt': [
-                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif"  # Wink
+                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",  # Wink
+                "https://media.giphy.com/media/l41Yh1jQhxNQHQXL2/giphy.gif",  # Cute
+                "https://media.giphy.com/media/l0HlDJhyI8qoh7Wfu/giphy.gif"  # Sweet
             ],
             'positive': [
                 "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif",  # Thumbs up
                 "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",  # Happy dance
-                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif"  # Celebration
+                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",  # Celebration
+                "https://media.giphy.com/media/l41YdDNnasCzZXWX6/giphy.gif"  # Awesome
             ],
             'negative': [
-                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif"  # Angry
+                "https://media.giphy.com/media/W3QKEujo8vztC/giphy.gif",  # Angry
+                "https://media.giphy.com/media/l41YfykEffZ7QM55m/giphy.gif",  # Mad
+                "https://media.giphy.com/media/l0HlDHQEiIdY3kxlm/giphy.gif"  # Rage
             ],
-            'neutral': [
-                "https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif"  # Meh
-            ]
+            'neutral': NEUTRAL_MEMES
         }
         
-        # Return a fallback meme based on emotion, or a neutral one if no specific fallback
+        # Return a random fallback meme based on emotion, or a neutral one if no specific fallback
         return random.choice(fallback_memes.get(emotion, NEUTRAL_MEMES))
         
     except Exception as e:
@@ -333,13 +369,13 @@ def calculate_optimal_font_size(draw, text, image_width, image_height, border_he
     
     # Base maximum size on border height (which is 20% of image height)
     if word_count <= 3 and char_count <= 15:
-        max_size = min(70, border_height // 2)
+        max_size = min(60, border_height // 3)  # Reduced from 70 to 60
     elif word_count <= 6 and char_count <= 30:
-        max_size = min(55, border_height // 2)
+        max_size = min(45, border_height // 3)  # Reduced from 55 to 45
     else:
-        max_size = min(45, border_height // 2)
+        max_size = min(35, border_height // 3)  # Reduced from 45 to 35
     
-    min_size = 25
+    min_size = 20  # Reduced from 25 to 20
     current_size = max_size
     
     while current_size >= min_size:
@@ -347,7 +383,7 @@ def calculate_optimal_font_size(draw, text, image_width, image_height, border_he
             font = get_font(text, current_size)
             wrapped_text = wrap_text(text, image_width * 0.85, font, draw)
             num_lines = wrapped_text.count('\n') + 1
-            line_spacing = current_size // 6
+            line_spacing = current_size // 4  # Reduced from 6 to 4 for tighter spacing
             total_text_height = (current_size * num_lines) + (line_spacing * (num_lines - 1))
             
             bbox = draw.multiline_textbbox((0, 0), wrapped_text, font=font, align='center', spacing=line_spacing)
@@ -359,16 +395,16 @@ def calculate_optimal_font_size(draw, text, image_width, image_height, border_he
                 total_text_height <= border_height * 0.85):
                 return font, text_width, text_height, wrapped_text, line_spacing
             
-            current_size -= 3
+            current_size -= 2  # Reduced step size from 3 to 2 for finer control
         except:
-            current_size -= 3
+            current_size -= 2
             continue
     
     # If no size worked, use minimum size
     font = get_font(text, min_size)
     wrapped_text = wrap_text(text, image_width * 0.85, font, draw)
     bbox = draw.multiline_textbbox((0, 0), wrapped_text, font=font, align='center')
-    line_spacing = min_size // 6
+    line_spacing = min_size // 4  # Reduced from 6 to 4
     return font, bbox[2] - bbox[0], bbox[3] - bbox[1], wrapped_text, line_spacing
 
 def add_text_to_image(image_url, text):
@@ -402,9 +438,9 @@ def add_text_to_image(image_url, text):
                     draw, text, frame_with_text.width, frame_with_text.height, border_height
                 )
                 
-                # Center text in the border area
+                # Center text in the border area with more padding at the bottom
                 x = (frame_with_text.width - text_width) / 2
-                y = (frame_with_text.height - border_height) + ((border_height - text_height) / 2)
+                y = (frame_with_text.height - border_height) + ((border_height - text_height) / 2) - 5  # Added -5 for better bottom padding
                 
                 # Draw outline
                 outline_width = 2
@@ -460,7 +496,7 @@ def add_text_to_image(image_url, text):
             )
             
             x = (image.width - text_width) / 2
-            y = (image.height - border_height) + ((border_height - text_height) / 2)
+            y = (image.height - border_height) + ((border_height - text_height) / 2) - 5  # Added -5 for better bottom padding
             
             outline_width = 2
             for adj in range(-outline_width, outline_width+1):
