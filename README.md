@@ -14,8 +14,8 @@ A Streamlit application that generates memes with Marathi text. The app detects 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/marathi-meme-generator.git
-cd marathi-meme-generator
+git clone https://github.com/pri-collab/meme-gen.git
+cd meme-gen
 ```
 
 2. Create a virtual environment and activate it:
@@ -59,4 +59,3 @@ streamlit run streamlit_app.py
 - "jevlas ka" → Flirt emotion
 - "खूप छान" → Happy emotion
 - "gadhav" → Roast emotion
-
