@@ -29,7 +29,7 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 3. Install dependencies using uv:
 ```bash
-uv pip install -e .
+uv add streamlit pillow requests python-dotenv giphy_client nltk
 ```
 
 4. Create a `.env` file with your GIPHY API key:
@@ -41,7 +41,7 @@ GIPHY_API_KEY=your_api_key_here
 
 1. Run the Streamlit app:
 ```bash
-.venv/bin/python -m streamlit run src/marathi_meme_generator/main.py
+.venv/bin/python -m streamlit run src/marathi_meme_generator/streamlit_app.py
 ```
 
 2. Open your browser and go to http://localhost:8501
